@@ -128,6 +128,19 @@ int Initialize() {
     fclose(settings_file);
     printGreen("Read %s.\n", SERVER_SETTINGS_FILE);
 
+    printf("Reading key file.\n");
+    FILE * key_file = CreateOrOpenFileVerbose(KEY_FILE, default_settings);
+    if(key_file == NULL) {
+        printRed("Initialization failed during access of file: %s.\n", KEY_FILE);
+        return 0;
+    }
+    int key_read_err = ReadKeyIntoSettingsMap(key_file, settings_map);
+    if(key_read_err) {
+        printRed("Initizliation failed while reading key file %s. Correct this file or delete it so default can be generated.\n", KEY_FILE);
+    }
+    fclose(key_file);
+    printGreen("Read %s.\n", KEY_FILE);
+    
     printf("Initializing logger.\n");
     int logger_initialized = _initializeLogger();
     if(!logger_initialized) {

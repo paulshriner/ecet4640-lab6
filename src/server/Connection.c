@@ -13,16 +13,20 @@
 #include "Log.h"
 #include "Data.h"
 #include "File.h"
+#include "Cipher.h"
 
 ClientShared shared;
 
-ClientShared * InitializeShared(map * users_map, size_t send_buffer_size, size_t receive_buffer_size)
+ClientShared * InitializeShared(map * users_map, size_t send_buffer_size, size_t receive_buffer_size, char* cipher, char start, char end)
 {
     shared.users = users_map;
     shared.dirty = 0;
     shared.shutting_down = 0;
     shared.send_buffer_size = send_buffer_size;
     shared.receive_buffer_size = receive_buffer_size;
+    shared.cipher = cipher;
+    shared.start = start;
+    shared.end = end;
     pthread_mutex_init(&(shared.mutex), NULL);
     return &shared;
 }
@@ -162,6 +166,7 @@ void * StartConnectionThread(void * p_connection)
 
 int MessageOrClose(char * send_buffer, char * receive_buffer, Connection * connection) {
     receive_buffer[0] = '\0';
+    EncryptString(send_buffer, strlen(send_buffer), shared.cipher, shared.start, shared.end);
     //memset(receive_buffer, 0, shared.receive_buffer_size);
     if(send(connection->socket, send_buffer, shared.send_buffer_size, 0) < 0) {
         printRed("Failed to send message to %s. Disconnecting.\n", inet_ntoa(connection->address.sin_addr));
@@ -183,6 +188,8 @@ int MessageOrClose(char * send_buffer, char * receive_buffer, Connection * conne
     }
     send_buffer[0] = '\0';
     // memset(send_buffer, 0, shared.send_buffer_size);
+
+    DecryptString(send_buffer, strlen(send_buffer), shared.cipher, shared.start, shared.end);
     return received_size;
 }
 
@@ -190,6 +197,7 @@ int MessageOrClose(char * send_buffer, char * receive_buffer, Connection * conne
 
 void MessageAndClose(char * send_buffer, Connection * connection) {
     strcat(send_buffer, "<Disconnect>");
+    EncryptString(send_buffer, strlen(send_buffer), shared.cipher, shared.start, shared.end);
     send(connection->socket, send_buffer, shared.send_buffer_size, 0);
     connection->status = ConnectionStatus_CLOSING;
     if(connection -> user != NULL) {

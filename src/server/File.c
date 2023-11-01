@@ -74,6 +74,33 @@ FILE * CreateOrOpenFileVerbose(char * filename, char * defaultContents) {
     return file;
 }
 
+int ReadKeyIntoSettingsMap(FILE* key_file, map* settings_map) {
+    char* start = malloc(2);
+    printBlue("Start char is: '%s'\n", start);
+    fgets(start, sizeof(start), key_file);
+    char* end = malloc(2);
+    fgets(end, sizeof(end), key_file);
+    printBlue("End char is: '%s'\n", end);
+
+    char* start_key = malloc(sizeof("start_char"));
+    strcpy(start_key, "start_char");
+    char* end_key = malloc(sizeof("end_char"));
+    strcpy(end_key, "end_char");
+    char* cipher_key = malloc(sizeof("cipher"));
+    strcpy(cipher_key, "cipher");
+
+    char* cipher = calloc(end[0] - start[0] + 2, sizeof(char));
+    printGreen("Value of end char is: '%d'\n", (int)end[0]);
+    printGreen("Value of start char is: '%d'\n", (int)start[0]);
+    printBlue("Value of end[0] - start[0] + 1 is: '%d'\n", end[0] - start[0] + 1);
+    fgets(cipher, end[0] - start[0] + 2, key_file);
+    printBlue("Cipher is: '%s'\n", cipher);
+
+    Map_Set(settings_map, start_key, start);
+    Map_Set(settings_map, end_key, end);
+    Map_Set(settings_map, cipher_key, cipher);
+}
+
 
 int ReadRegisteredFileIntoUsersMap(FILE * reg_file, map * users_map) {
 

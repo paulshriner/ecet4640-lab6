@@ -32,6 +32,15 @@ typedef struct {
     int max_connections;
     /** The time the server was started. */
     time_t time_started;
+
+    /** The cipher to use when encrypting and decrypting messages*/
+    char* cipher;
+
+    /** first character in cipher substitutions range*/
+    char start;
+
+    /** last character in cipher substituion range*/
+    char end;
 } ServerProperties;
 
 /**
@@ -40,6 +49,13 @@ typedef struct {
  * @returns 1 of it was able to initialize, otherwise 0.
 */
 int InitializeServer();
+
+/**
+ * @brief Initilizes the cipher from the key file
+ * 
+ * @return int 1 if it was able to initialize, otherwise 0
+ */
+int InitializeCipher();
 
 /**
  * Starts the server. 

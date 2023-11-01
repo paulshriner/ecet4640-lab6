@@ -87,6 +87,28 @@ void _readSettingsMapIntoServerStruct(map * server_settings) {
             server.max_connections = found_max_connections;
         }
     }
+    result = Map_Get(server_settings, "start_char");
+    if(!result.found) {
+        printYellow("No start_char setting found. Defaulting to ' '\n");
+        server.start = ' ';
+    } else {
+        char* start = result.data;
+        server.start = start[0];
+    }
+    result = Map_Get(server_settings, "end_char");
+    if(!result.found) {
+        printYellow("No end_char setting found. defaulting to '~'\n");
+        server.end = '~';
+    } else {
+        char* end = result.data;
+        server.end = end[0];
+    }
+    result = Map_Get(server_settings, "cipher");
+    if(!result.found) {
+        printRed("No cipher found");
+    } else {
+        server.cipher = result.data;
+    }
 };
 
 int InitializeServer(map * server_settings) {
@@ -120,7 +142,7 @@ int StartServer(map * users_map) {
         return 0;
     }
     // Initialized a shared space that will be used across threads.
-    ClientShared * shared = InitializeShared(users_map, server.send_buffer_size, server.receive_buffer_size);
+    ClientShared * shared = InitializeShared(users_map, server.send_buffer_size, server.receive_buffer_size, server.cipher, server.start, server.end);
     // The update thread is responsible for checking if there is 'dirty' data that should be saved to the registered user's file.
     pthread_t registered_update_thread;
     pthread_create(&registered_update_thread, NULL, StartUpdateThread, NULL);
