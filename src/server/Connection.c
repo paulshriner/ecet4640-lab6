@@ -189,7 +189,7 @@ int MessageOrClose(char * send_buffer, char * receive_buffer, Connection * conne
     send_buffer[0] = '\0';
     // memset(send_buffer, 0, shared.send_buffer_size);
 
-    DecryptString(send_buffer, strlen(send_buffer), shared.cipher, shared.start, shared.end);
+    DecryptString(receive_buffer, strlen(receive_buffer), shared.cipher, shared.start, shared.end);
     return received_size;
 }
 

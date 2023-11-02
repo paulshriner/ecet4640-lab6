@@ -11,6 +11,7 @@
 #include <time.h>
 #include <string.h>
 #include "colors.h"
+#include "Util.h"
 
 /**
     @private
@@ -88,9 +89,9 @@ void DecryptString(char* string, int length, char* cipher, char start, char end)
     for(i = 0; i < length; i++) {
         if(!(string[i] - start > end || string[i] < start)) {
             char* c = strchr(cipher, string[i]);
-            int index = c - string;
+            char val = c - cipher + start;
 
-            string[i] = cipher[index];
+            string[i] = val;
         }
     }
 }
