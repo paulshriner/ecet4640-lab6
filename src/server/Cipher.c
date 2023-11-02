@@ -89,9 +89,7 @@ void DecryptString(char* string, int length, char* cipher, char start, char end)
     for(i = 0; i < length; i++) {
         if(!(string[i] - start > end || string[i] < start)) {
             char* c = strchr(cipher, string[i]);
-            char val = c - cipher + start;
-
-            string[i] = val;
+            string[i] = c - cipher + start;
         }
     }
 }
