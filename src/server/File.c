@@ -76,8 +76,8 @@ FILE * CreateOrOpenFileVerbose(char * filename, char * defaultContents) {
 
 int ReadKeyIntoSettingsMap(FILE* key_file, map* settings_map) {
     char* start = malloc(2);
-    printBlue("Start char is: '%s'\n", start);
     fgets(start, sizeof(start), key_file);
+    printBlue("Start char is: '%s'\n", start);
     char* end = malloc(2);
     fgets(end, sizeof(end), key_file);
     printBlue("End char is: '%s'\n", end);
