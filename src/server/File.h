@@ -38,11 +38,19 @@
 #define SERVER_SETTINGS_FILE "server-settings.txt"
 
 /**
+ * @brief contains the key for the cipher
+ * @note starts with the first character that it starts substituting followed by \n followed by the last chracter in substitution range followed by a \n and then the cipher in ascii order fro mthe start character to the last character of the characters to use instead at that spot
+ */
+#define KEY_FILE "sub.key"
+
+/**
  * Contains files of ascii art to sent to clients.
  * 
  * @note should be the relative directory to the file the ads are in
  */
 #define ADS_DIR "ads"
+
+#define CIPHER_MAX_LENGTH 100
 
 // ~~~~~ General File Functions ~~~~~ //
 
@@ -88,6 +96,15 @@ int ReadSettingsFileIntoSettingsMap(FILE * settings_file, map * settings_map);
  * @param users_map the map of users to use to update
  */
 void UpdateRegisteredFileFromUsersMap(FILE * reg_file, map * users_map);
+
+/**
+ * @brief Reads the cipher file into the settings map
+ * 
+ * @param key_file file to read
+ * @param settings_map map to put the settings into
+ * @return 1 if successful, 0 otherwise
+ */
+int ReadKeyIntoSettingsMap(FILE* key_file, map* settings_map);
 
 /**
  * @brief Get the Random File Name From Dir object

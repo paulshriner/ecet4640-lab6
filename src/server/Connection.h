@@ -28,6 +28,13 @@ typedef struct {
     size_t send_buffer_size;
     /** Passed along from server settings at the time shared is initialized*/
     size_t receive_buffer_size;
+
+    /** A string containing the cipher to use when encoding and decoding messages*/
+    char* cipher;
+    /** Starting character of cipher*/
+    char start;
+    /** ending character of cipher*/
+    char end;
 } ClientShared;
 
 #define ClientState_ENTRY 1
@@ -68,7 +75,7 @@ typedef struct {
  * @param users_map The map of User structs.
  * @returns A pointer to the same ClientShared object seen by the connection threads.
 */
-ClientShared * InitializeShared(map * users_map, size_t send_buffer_size, size_t receive_buffer_size);
+ClientShared * InitializeShared(map * users_map, size_t send_buffer_size, size_t receive_buffer_size, char * cipher, char start, char end);
 
 /** Starts a connection thread
  * @param connection A pointer to a Connection structure from the server's connections array.
