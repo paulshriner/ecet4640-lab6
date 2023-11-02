@@ -6,6 +6,8 @@
  * @{
 */
 
+#include <stdarg.h>
+
 /** A virtual terminal escape sequence to print foreground red. */
 #define COLOR_RED "\e[38;2;255;75;75m"
 /** A VTE for green. */
@@ -69,6 +71,7 @@ float RandomFloat(float min, float max);
     @returns 1 or 0
 */
 short RandomFlag(float percentage_chance);
+
 
 /**
  * @}
