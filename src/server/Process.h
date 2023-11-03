@@ -14,6 +14,11 @@
 */
 void SignalHandle(int signo);
 
+/**
+ * Initializes the Cipher.
+*/
+int InitializeCipher();
+
 /***
  * Performs initializing activities which must occur prior to a server loop starting.
  * 

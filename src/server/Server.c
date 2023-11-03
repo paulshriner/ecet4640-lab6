@@ -16,6 +16,7 @@
 #include "Connection.h"
 #include "Util.h"
 #include "map.h"
+#include "Logfile.h"
 
 ServerProperties server;
 Connection * connections;
@@ -105,9 +106,17 @@ void _readSettingsMapIntoServerStruct(map * server_settings) {
     }
     result = Map_Get(server_settings, "cipher");
     if(!result.found) {
-        printRed("No cipher found");
+        printRed("No cipher found.\n");
     } else {
         server.cipher = result.data;
+    }
+    result = Map_Get(server_settings, "log_file");
+    if(!result.found) {
+        printYellow("No log_file specified, defaulting to 'log.txt'.\n");
+        SetLogfileName("log.txt");
+    } else {
+        SetLogfileName((char *) result.data);
+        printBlue("Logging to %s.\n", result.data);
     }
 };
 
@@ -147,6 +156,7 @@ int StartServer(map * users_map) {
     pthread_t registered_update_thread;
     pthread_create(&registered_update_thread, NULL, StartUpdateThread, NULL);
     printBlue("Server listening on port: %d\n", ntohs(server.port));
+    LogfileMessage("Server started.");
     // begin listening according to the socket settings
     listen(serverSocket, server.backlog);
     while(!shared->shutting_down) {
@@ -154,6 +164,7 @@ int StartServer(map * users_map) {
         Connection * next_client = NextAvailableConnection();
         if(next_client == NULL) {
             printYellow("Server connections are maxxed.\n");
+            LogfileError("Server couldn't accept connection; available connections are maxxed.");
             sleep(1);
             continue;
         }
@@ -163,10 +174,12 @@ int StartServer(map * users_map) {
         if(next_client->socket < 0)
         {
             printRed("Failed to accept() client!\n");
+            LogfileError("Failed to accept() client.");
             sleep(1);
             continue;
         }
         printBlue("New client connection from IP: %s\n", inet_ntoa(next_client->address.sin_addr));
+        LogfileMessage("New client connection from IP: %s", inet_ntoa(next_client->address.sin_addr));
         next_client->status = ConnectionStatus_ACTIVE;
         // Start a thread to handle communication from that connection.
         pthread_create(&(next_client->thread_id), NULL, StartConnectionThread, next_client);
