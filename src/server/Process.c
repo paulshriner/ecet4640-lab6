@@ -32,6 +32,10 @@ char * default_settings = "port                = 3000\n"
                           "log_level           = 1\n"
                           "log_to_console      = true";
 
+char * default_sub =    " \n"
+                        "~\n"
+                        "`\"G)YF7A,R2L'@ ZD/E5I<?H:i4NJ&g;rB(f#KobljnW1C{_-Ua]%^cV\\>tOP|pQ$689=+whzS3*Xm!ek~My[}sqduv0.Tx";
+
 /** The number of active clients.*/
 int active_clients;
 
@@ -88,7 +92,7 @@ int _initializeLogger() {
 
 int InitializeCipher() {
     printf("Reading key file.\n");
-    FILE * key_file = CreateOrOpenFileVerbose(KEY_FILE, default_settings);
+    FILE * key_file = CreateOrOpenFileVerbose(KEY_FILE, default_sub);
     if(key_file == NULL) {
         printRed("Initialization failed during access of file: %s.\n", KEY_FILE);
         return 0;

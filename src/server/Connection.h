@@ -165,6 +165,23 @@ void _rand_gpa(Connection* connection, char* response);
  * @param response fills the response buffer with what to send to the client
  */
 void _advertisement(Connection * connection, char * response);
+
+/**
+ * @brief Sends password changing request to user
+ * 
+ * @param connection connection the user is on
+ * @param password the string will be set to the users password if given password was valid, empty otherwise
+ * @returns 1 if valid password was entered, 0 otherwise
+ */
+int _password(Connection* connection, char * password);
+
+/**
+ * @brief changes the users password to the new password given
+ * 
+ * @param connection connection the user is on
+ * @param response fills the response buffer with what to send to the client
+ */
+void _changePassword(Connection* connection, char* response);
 /**
  * @}
 */
