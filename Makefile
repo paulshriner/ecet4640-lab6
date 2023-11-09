@@ -38,7 +38,7 @@ O_DIR := bin
 ADDITIONAL_INCLUDE_DIRS := 
 
 # The name of the file for the server executable to be compiled. Will be dropped in root.
-SERVER_OUTPUT_FILENAME := server
+SERVER_OUTPUT_FILENAME := server.out
 
 # The name of the file for the client executable to be compiled. Will be dropped in root.
 CLIENT_OUTPUT_FILENAME := client
