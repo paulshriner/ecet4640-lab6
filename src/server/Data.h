@@ -27,6 +27,10 @@
 */
 #define IP_LENGTH 16
 
+/**
+ * Max length of password
+*/
+#define PASSWORD_LENGTH 20
 
 /**
  * An array of the accepted userIDs.
@@ -59,6 +63,8 @@ typedef struct
     long lastConnection;
     /// @brief Whether user has executed the 'register' command. 
     short registered;
+    /// @brief Passsword of the user
+    char password[PASSWORD_LENGTH]
 } User;
 
 /**
