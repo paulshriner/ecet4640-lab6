@@ -13,7 +13,7 @@
 /**
  * The presence of a lockfile indicates that a server process is already running. The lockfile contains the process ID of the running process.
 */
-#define LOCKFILE "/tmp/lab5.lock"
+#define LOCKFILE "/tmp/lab6.lock"
 
 /**
  * This file contains a list of registered users and their data, with fields tab-delimited.

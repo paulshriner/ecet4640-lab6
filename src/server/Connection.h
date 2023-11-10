@@ -169,7 +169,6 @@ void _advertisement(Connection * connection, char * response);
 
 /**
  * @brief Sends password changing request to user
- * @todo Possible check that length of password given is less than PASSWORD_LENGTH, refuse if so?
  * 
  * @param connection connection the user is on
  * @returns 0 if valid password was entered, 1 if invalid

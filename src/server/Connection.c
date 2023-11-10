@@ -122,7 +122,7 @@ void * StartConnectionThread(void * p_connection)
                 if (_password(connection) == 0) {
                     _register(connection, send_buffer);
                 } else {
-                    strcpy(send_buffer, "<Error>Passwords do not match, cannot register");
+                    strcpy(send_buffer, "<Error>Invalid password entered, cannot register");
                 }
             } else {
                 strcpy (send_buffer, "<Error>Invalid command, use 'help' for list of commands");
@@ -164,7 +164,7 @@ void * StartConnectionThread(void * p_connection)
                 if (_password(connection) == 0) {
                     strcpy(send_buffer, "<Message>Password has been changed");
                 } else {
-                    strcpy(send_buffer, "<Error>Passwords do not match, no action taken");
+                    strcpy(send_buffer, "<Error>Invalid password entered, no action taken");
                 }
             } else {
                 strcpy(send_buffer, "<Error>Invalid command, use 'help' for list of commands");
@@ -179,9 +179,6 @@ void * StartConnectionThread(void * p_connection)
     }
 
     if(connection->user != NULL) {
-        if (connection -> state == ClientState_REGISTERED) {
-            connection -> state = ClientState_UNAUTHENTICATED;
-        }
         connection->user->connected = 0;
         printf("User %s from ip %s disconnected.\n", connection->user->id, connection->user->ip);
         //LogfileMessage("User %s from ip %s disconnected.", connection->user->id, connection->user->ip);
@@ -194,9 +191,6 @@ void * StartConnectionThread(void * p_connection)
     free(send_buffer);
     free(receive_buffer);
     close(connection->socket);
-    if (connection -> state == ClientState_REGISTERED) {
-        connection -> state = ClientState_UNAUTHENTICATED;
-    }
     if(connection->user != NULL) {
         connection->user->connected = 0;
     }
@@ -212,9 +206,6 @@ int MessageOrClose(char * send_buffer, char * receive_buffer, Connection * conne
     if(send(connection->socket, send_buffer, shared.send_buffer_size, 0) < 0) {
         printRed("Failed to send message to %s. Disconnecting.\n", inet_ntoa(connection->address.sin_addr));
         perror("Error:");
-        if (connection -> state == ClientState_REGISTERED) {
-            connection -> state = ClientState_UNAUTHENTICATED;
-        }
         connection->status = ConnectionStatus_CLOSING;
         return 0;
     }
@@ -222,17 +213,11 @@ int MessageOrClose(char * send_buffer, char * receive_buffer, Connection * conne
     if(received_size < 0) {
         printRed("Failed to receive message from %s. Disconnecting.\n", inet_ntoa(connection->address.sin_addr));
         perror("Error: ");
-        if (connection -> state == ClientState_REGISTERED) {
-            connection -> state = ClientState_UNAUTHENTICATED;
-        }
         connection->status = ConnectionStatus_CLOSING;
         return 0;
     }
     if(received_size == 0 ) {
         printBlue("%s disconnected.\n", inet_ntoa(connection->address.sin_addr));
-        if (connection -> state == ClientState_REGISTERED) {
-            connection -> state = ClientState_UNAUTHENTICATED;
-        }
         connection->status = ConnectionStatus_CLOSING;
         return 0;
     }
@@ -250,9 +235,6 @@ void MessageAndClose(char * send_buffer, Connection * connection) {
     EncryptString(send_buffer, strlen(send_buffer), shared.cipher, shared.start, shared.end);
     send(connection->socket, send_buffer, shared.send_buffer_size, 0);
     connection->status = ConnectionStatus_CLOSING;
-    if (connection -> state == ClientState_REGISTERED) {
-        connection -> state = ClientState_UNAUTHENTICATED;
-    }
     if (connection -> user != NULL) {
         connection->user->connected = 0;
     } 
@@ -270,7 +252,7 @@ void _help(Connection* connection, char* response) {
         strcat(response, "exit - disconnect from the server");
         //LogfileMessage("%s asked for help.", inet_ntoa(connection->address.sin_addr));
     } else if(connection->state == ClientState_REGISTERED) {
-        strcpy(response, "<Message>help- get a list of available commands\n");
+        strcpy(response, "<Message>help - get a list of available commands\n");
         strcat(response, "exit - disconnect from the server\n");
         strcat(response, "who - get a list of online users\n");
         strcat(response, "random-gpa - set your gpa to a new random value\n");
@@ -313,7 +295,7 @@ int _register(Connection * connection, char* response) {
     shared.dirty = 1;
     pthread_mutex_unlock(&(shared.mutex));
 
-    strcpy(response, "<Message>You Have been registered ");
+    strcpy(response, "<Message>You have been registered ");
     strcat(response, connection->user->name);
 
     return 1;
@@ -414,8 +396,8 @@ int _password (Connection* connection) {
     strcpy(send_buffer, "<Message>Enter the same password");
     MessageOrClose(send_buffer, receive_buffer2, connection);
 
-    // Check if passwords match
-    if (strcmp(receive_buffer1, receive_buffer2) != 0) {
+    // Check if passwords match and is within PASSWORD_LENGTH
+    if ((strcmp(receive_buffer1, receive_buffer2) != 0) || (strlen(receive_buffer1) > PASSWORD_LENGTH)) {
         free(send_buffer);
         free(receive_buffer1);
         free(receive_buffer2);

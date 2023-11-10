@@ -75,14 +75,12 @@ FILE * CreateOrOpenFileVerbose(char * filename, char * defaultContents) {
 }
 
 int ReadKeyIntoSettingsMap(FILE* key_file, map* settings_map) {
-    char* start = malloc(2 * sizeof(char));
-    start[1] = '\0';
-    fgets(start, 1, key_file);
-    printBlue("Start char is: '%s'\n", start);
-    char* end = malloc(2 * sizeof(char));
-    end[1] = '\0';
-    fgets(end, 1, key_file);
-    printBlue("End char is: '%s'\n", end);
+    char* start = malloc(sizeof(char*));
+    fgets(start, sizeof(start), key_file);
+    printBlue("Start char is: '%c'\n", start[0]);
+    char* end = malloc(sizeof(char*));
+    fgets(end, sizeof(end), key_file);
+    printBlue("End char is: '%c'\n", end[0]);
 
     char* start_key = malloc(sizeof("start_char"));
     strcpy(start_key, "start_char");

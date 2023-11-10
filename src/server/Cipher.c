@@ -75,14 +75,14 @@ void EncryptString(char *string, int length, char *cipher, char start, char end)
     int i;
     for (i = 0; i < length; i++)
     {
-        printf("Encrypting string[%d] , was %c\n", i, string[i]);
-        printf("String in range between %c and %c?\n", start, end);
+        // printf("Encrypting string[%d] , was %c\n", i, string[i]);
+        // printf("String in range between %c and %c?\n", start, end);
         if (!(string[i] - start > end || string[i] < start))
         {
-            printf("String in range\n");
-            printf("String[%d] - %d(start) is: %d\n", i, start, string[i]-start);
+            // printf("String in range\n");
+            // printf("String[%d] - %d(start) is: %d\n", i, start, string[i]-start);
             string[i] = cipher[string[i] - start];
-            printf("String[%d] is now %c\n", i, string[i]);
+            // printf("String[%d] is now %c\n", i, string[i]);
         }
     }
 }

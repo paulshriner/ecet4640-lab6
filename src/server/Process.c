@@ -101,10 +101,11 @@ int InitializeCipher() {
         printRed("Initialization failed during access of file: %s.\n", KEY_FILE);
         return 0;
     }
-    int key_read_err = ReadKeyIntoSettingsMap(key_file, settings_map);
-    if(key_read_err) {
-        printRed("Initialization failed while reading key file %s. Correct this file or delete it so default can be generated.\n", KEY_FILE);
-    }
+    ReadKeyIntoSettingsMap(key_file, settings_map);
+    // int key_read_err = ReadKeyIntoSettingsMap(key_file, settings_map);
+    // if(key_read_err) {
+    //     printRed("Initialization failed while reading key file %s. Correct this file or delete it so default can be generated.\n", KEY_FILE);
+    // }
     fclose(key_file);
     printGreen("Read %s.\n", KEY_FILE);
     return 1;
