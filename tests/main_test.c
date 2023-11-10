@@ -2,6 +2,7 @@
 
 #include "map_test.h"
 #include "Util_test.h"
+#include "crypt_test.h"
 
 void RunAllTests(void)
 {
@@ -10,6 +11,7 @@ void RunAllTests(void)
     
     CuSuiteAddSuite(suite, mapTestGetSuite());
     CuSuiteAddSuite(suite, utilTestGetSuite());
+    CuSuiteAddSuite(suite, cryptTestGetSuite());
 
     CuSuiteRun(suite);
     CuSuiteSummary(suite, output);

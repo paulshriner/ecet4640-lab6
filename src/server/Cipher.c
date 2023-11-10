@@ -25,7 +25,7 @@
 */
 void FillArraySequential(char *array, char start, char end)
 {
-    char length = end - start + 1;
+    //char length = end - start + 1;
     char i;
     for (i = start; i <= end; i++)
     {
@@ -40,8 +40,8 @@ void GenerateCipher(char *cipher, char start, char end)
     srand((unsigned)time(&t));
 
     FillArraySequential(cipher, start, end);
-    char length = end - start + 1;
-    char hold, swap_index, i;
+    int length = end - start + 1;
+    int hold, swap_index, i;
     for (i = 0; i < length; i++)
     {
         swap_index = rand() % length;
@@ -55,7 +55,7 @@ void GenerateCipher(char *cipher, char start, char end)
 void PrintCipher(char *cipher, char start, char length)
 {
     printf("\nCipher:\n");
-    char i;
+    int i;
     for (i = 0; i < length; i++)
     {
         printf("%s\'%s%c%s\'%s \u00BB %s\'%s%c%s\'%s      ", COLOR_GRAY, COLOR_RED, i + start, COLOR_GRAY, COLOR_RESET, COLOR_GRAY, COLOR_BLUE, cipher[i], COLOR_GRAY, COLOR_RESET);
@@ -71,19 +71,24 @@ void PrintCipher(char *cipher, char start, char length)
 void EncryptString(char *string, int length, char *cipher, char start, char end)
 {
 
-    char cipher_l = end - start + 1;
+    //char cipher_l = end - start + 1;
     int i;
     for (i = 0; i < length; i++)
     {
+        printf("Encrypting string[%d] , was %c\n", i, string[i]);
+        printf("String in range between %c and %c?\n", start, end);
         if (!(string[i] - start > end || string[i] < start))
         {
+            printf("String in range\n");
+            printf("String[%d] - %d(start) is: %d\n", i, start, string[i]-start);
             string[i] = cipher[string[i] - start];
+            printf("String[%d] is now %c\n", i, string[i]);
         }
     }
 }
 
 void DecryptString(char* string, int length, char* cipher, char start, char end) {
-    char cipher_l = end - start + 1;
+    //char cipher_l = end - start + 1;
     
     int i;
     for(i = 0; i < length; i++) {

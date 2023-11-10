@@ -75,11 +75,13 @@ FILE * CreateOrOpenFileVerbose(char * filename, char * defaultContents) {
 }
 
 int ReadKeyIntoSettingsMap(FILE* key_file, map* settings_map) {
-    char* start = malloc(2);
-    fgets(start, sizeof(start), key_file);
+    char* start = malloc(2 * sizeof(char));
+    start[1] = '\0';
+    fgets(start, 1, key_file);
     printBlue("Start char is: '%s'\n", start);
-    char* end = malloc(2);
-    fgets(end, sizeof(end), key_file);
+    char* end = malloc(2 * sizeof(char));
+    end[1] = '\0';
+    fgets(end, 1, key_file);
     printBlue("End char is: '%s'\n", end);
 
     char* start_key = malloc(sizeof("start_char"));
@@ -99,21 +101,22 @@ int ReadKeyIntoSettingsMap(FILE* key_file, map* settings_map) {
     Map_Set(settings_map, start_key, start);
     Map_Set(settings_map, end_key, end);
     Map_Set(settings_map, cipher_key, cipher);
+    return 1;
 }
 
 
 int ReadRegisteredFileIntoUsersMap(FILE * reg_file, map * users_map) {
-
     char userID[ID_MAX_LENGTH];
     int user_age;
     float user_gpa;
     char userLastIP[IP_LENGTH];
     long lastConnection;
+    char userPassword[PASSWORD_LENGTH];
 
     int scan_items;
     int line = 1;
 
-    while( (scan_items = fscanf(reg_file, "%s\t%d\t%f\t%s\t%ld", userID, &user_age, &user_gpa, userLastIP, &lastConnection)) == 5) {
+    while( (scan_items = fscanf(reg_file, "%s\t%d\t%f\t%s\t%ld\t%s", userID, &user_age, &user_gpa, userLastIP, &lastConnection, userPassword)) == 6) {
         map_result result = Map_Get(users_map, userID);
         if(result.found == 0) {
             printYellow("Couldn't find user %s. Continuing read.\n", userID);
@@ -125,6 +128,7 @@ int ReadRegisteredFileIntoUsersMap(FILE * reg_file, map * users_map) {
         strcpy(user->ip, userLastIP);
         user->lastConnection = lastConnection;
         user->registered = 1;
+        strcpy(user->password, userPassword);
         line++;
     } 
 
@@ -146,7 +150,7 @@ void UpdateRegisteredFileFromUsersMap(FILE * reg_file, map * users_map) {
 
         User * user = (User *) result.data;
         if(user->registered) {
-            fprintf(reg_file, "%s\t%d\t%f\t%s\t%ld", user->id, user->age, user->gpa, user->ip, user->lastConnection);
+            fprintf(reg_file, "%s\t%d\t%f\t%s\t%ld\t%s", user->id, user->age, user->gpa, user->ip, user->lastConnection, user -> password);
         }
     }
 }

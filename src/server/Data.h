@@ -64,7 +64,7 @@ typedef struct
     /// @brief Whether user has executed the 'register' command. 
     short registered;
     /// @brief Passsword of the user
-    char password[PASSWORD_LENGTH]
+    char password[PASSWORD_LENGTH];
 } User;
 
 /**

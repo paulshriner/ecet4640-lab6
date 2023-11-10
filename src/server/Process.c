@@ -14,6 +14,7 @@
 #include "Util.h"
 #include "Server.h"
 #include "Log.h"
+#include "Logfile.h"
 #include "Connection.h"
 
 /** The array of users. This will be populated on initialize by functions in Build. */
@@ -40,54 +41,57 @@ char * default_sub =    " \n"
 int active_clients;
 
 int _initializeLogger() {
-    char* fileName = "log.txt";
-    int printLevel, LogLevel, printAlltoStdOut;
-    map_result result = Map_Get(settings_map, "log_file");
-    if(!result.found) {
-        printYellow("No output file found. Defaulting to 'log.txt'\n");
-    } else {
-        fileName = result.data;
-    }
-
-    result = Map_Get(settings_map, "print_level");
-    if(!result.found) {
-        printYellow("No print_level found, defaulting to 3\n");
-        printLevel = 3;
-    } else {
-        printLevel = atoi(result.data);
-        if(printLevel < 0 || printLevel > 5) {
-            printYellow("Invalid print_level of %d, defaulting to 3\n", printLevel);
-            printLevel = 3;
-        }
-    }
-    
-    result = Map_Get(settings_map, "log_level");
-    if(!result.found) {
-        printYellow("No log_level found, defaulting to 3\n");
-        LogLevel = 3;
-    } else {
-        LogLevel = atoi(result.data);
-        if(LogLevel < 0 || LogLevel > 5) {
-            printYellow("Invalid log_level of %d, defaulting to 3\n", LogLevel);
-            LogLevel = 3;
-        }
-    }
-
-    result = Map_Get (settings_map, "log_to_console");
-    if(!result.found) {
-        printYellow("No log_to_console found, defaulting to true\n");
-        printAlltoStdOut = 1;
-    } else {
-        if(strcmp(result.data, "true") == 0) {
-            printAlltoStdOut = 1;
-        } else if(strcmp(result.data, "false") == 0) {
-            printAlltoStdOut = 0;
-        } else {
-            printYellow("invalid data in log_to_console, defaulting to true\n");
-            printAlltoStdOut = 1;
-        }
-    }
     return 1;
+    // char* fileName = "log.txt";
+    // int printLevel, LogLevel, printAlltoStdOut;
+    // map_result result = Map_Get(settings_map, "log_file");
+    // if(!result.found) {
+    //     printYellow("No output file found. Defaulting to 'log.txt'\n");
+    //     SetLogfileName("log.txt");
+    // } else {
+    //     fileName = result.data;
+    //     SetLogfileName(fileName);
+    // }
+
+    // result = Map_Get(settings_map, "print_level");
+    // if(!result.found) {
+    //     printYellow("No print_level found, defaulting to 3\n");
+    //     printLevel = 3;
+    // } else {
+    //     printLevel = atoi(result.data);
+    //     if(printLevel < 0 || printLevel > 5) {
+    //         printYellow("Invalid print_level of %d, defaulting to 3\n", printLevel);
+    //         printLevel = 3;
+    //     }
+    // }
+    
+    // result = Map_Get(settings_map, "log_level");
+    // if(!result.found) {
+    //     printYellow("No log_level found, defaulting to 3\n");
+    //     LogLevel = 3;
+    // } else {
+    //     LogLevel = atoi(result.data);
+    //     if(LogLevel < 0 || LogLevel > 5) {
+    //         printYellow("Invalid log_level of %d, defaulting to 3\n", LogLevel);
+    //         LogLevel = 3;
+    //     }
+    // }
+
+    // result = Map_Get (settings_map, "log_to_console");
+    // if(!result.found) {
+    //     printYellow("No log_to_console found, defaulting to true\n");
+    //     printAlltoStdOut = 1;
+    // } else {
+    //     if(strcmp(result.data, "true") == 0) {
+    //         printAlltoStdOut = 1;
+    //     } else if(strcmp(result.data, "false") == 0) {
+    //         printAlltoStdOut = 0;
+    //     } else {
+    //         printYellow("invalid data in log_to_console, defaulting to true\n");
+    //         printAlltoStdOut = 1;
+    //     }
+    // }
+    // return 1;
 }
 
 int InitializeCipher() {
@@ -103,7 +107,7 @@ int InitializeCipher() {
     }
     fclose(key_file);
     printGreen("Read %s.\n", KEY_FILE);
-    
+    return 1;
 }
 
 int Initialize() {

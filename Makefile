@@ -38,7 +38,7 @@ O_DIR := bin
 ADDITIONAL_INCLUDE_DIRS := 
 
 # The name of the file for the server executable to be compiled. Will be dropped in root.
-SERVER_OUTPUT_FILENAME := server.out
+SERVER_OUTPUT_FILENAME := server
 
 # The name of the file for the client executable to be compiled. Will be dropped in root.
 CLIENT_OUTPUT_FILENAME := client
@@ -127,12 +127,16 @@ cleanf: clean
 
 PHONY: clean
 clean:
-	rm -r $(O_DIR)
-	mkdir -p $(O_DIR)
-	rm -f $(TESTOUTFILE)
-	rm -f $(SERVER_OUTPUT_FILENAME)
-	rm -f $(CLIENT_OUTPUT_FILENAME)
-	rm example/client
-	rm example/server
-	rm example/server2
+	-rm -r $(O_DIR)
+	-mkdir -p $(O_DIR)
+	-rm -f $(TESTOUTFILE)
+	-rm -f $(SERVER_OUTPUT_FILENAME)
+	-rm -f $(CLIENT_OUTPUT_FILENAME)
+	-rm example/client
+	-rm example/server
+	-rm example/server2
+
+clean-test:
+	-rm -r $(O_DIR)/tests
+	-rm $(TESTOUTFILE)
 	

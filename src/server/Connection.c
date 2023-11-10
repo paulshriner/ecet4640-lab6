@@ -64,12 +64,11 @@ void * StartConnectionThread(void * p_connection)
     // allocate send and receive buffers.
     char * send_buffer = malloc(shared.send_buffer_size);
     char * receive_buffer = malloc(shared.receive_buffer_size);
-    int bytes_received;
     map_result result;
 
     // ask for their user ID initially, or disconnect them.
     strcpy(send_buffer, "<Message>Welcome. Please send your user ID.");
-    bytes_received = MessageOrClose(send_buffer, receive_buffer, connection);
+    MessageOrClose(send_buffer, receive_buffer, connection);
     if(connection->status == ConnectionStatus_ACTIVE) {
         result = Map_Get(shared.users, receive_buffer);
         if(!result.found)
@@ -92,7 +91,7 @@ void * StartConnectionThread(void * p_connection)
                 connection->user->connected = 1;
                 strcpy(connection->user->ip, inet_ntoa(connection->address.sin_addr));
                 if(connection->user->registered) {
-                    connection->state = ClientState_REGISTERED;
+                    connection->state = ClientState_UNAUTHENTICATED;
                     //TODO check password
                     //LogfileMessage("User %s logged in from ip %s.", connection->user->name, inet_ntoa(connection->address.sin_addr));
                 } else {
@@ -104,8 +103,10 @@ void * StartConnectionThread(void * p_connection)
 
     if(connection->state == ClientState_ACCESSING && connection->status == ConnectionStatus_ACTIVE) {
         strcpy(send_buffer, "<Message>Say something, unregistered user!");
+    } else if (connection->state == ClientState_UNAUTHENTICATED && connection->status == ConnectionStatus_ACTIVE) {
+        strcpy(send_buffer, "<Message>Say something, registered user (logged out)!");
     } else if (connection->state == ClientState_REGISTERED && connection->status == ConnectionStatus_ACTIVE) {
-        strcpy(send_buffer, "<Message>Say something, registered user!");
+        strcpy(send_buffer, "<Message>Say something, registered user (logged in)!");
     }
 
     while(connection->status == ConnectionStatus_ACTIVE)
@@ -118,7 +119,27 @@ void * StartConnectionThread(void * p_connection)
                 strcpy(send_buffer, "<Message>Goodbye.");
                 MessageAndClose(send_buffer, connection);
             } else if (strcmp(receive_buffer, "register") == 0) {
-                _register(connection, send_buffer);
+                if (_password(connection) == 0) {
+                    _register(connection, send_buffer);
+                } else {
+                    strcpy(send_buffer, "<Error>Passwords do not match, cannot register");
+                }
+            } else {
+                strcpy (send_buffer, "<Error>Invalid command, use 'help' for list of commands");
+            }
+        } else if (connection -> state == ClientState_UNAUTHENTICATED) {
+            MessageOrClose(send_buffer, receive_buffer, connection);
+            if (strcmp(receive_buffer, "help") == 0) {
+                _help(connection, send_buffer);
+            } else if (strcmp(receive_buffer, "exit") == 0) {
+                strcpy(send_buffer, "<Message>Goodbye.");
+                MessageAndClose(send_buffer, connection);
+            } else if (strcmp(receive_buffer, "login") == 0) {
+                if (_authenticate(connection) == 0) {
+                    strcpy(send_buffer, "<Message>You have logged in!");
+                } else {
+                    strcpy(send_buffer, "<Message>Login failed!");
+                }
             } else {
                 strcpy (send_buffer, "<Error>Invalid command, use 'help' for list of commands");
             }
@@ -133,13 +154,19 @@ void * StartConnectionThread(void * p_connection)
                 _myinfo(connection, send_buffer);
             } else if (strcmp(receive_buffer, "who") == 0) {
                 _who(send_buffer);
-            } else if(strcmp(receive_buffer, "random-gpa") == 0) {
+            } else if (strcmp(receive_buffer, "random-gpa") == 0) {
                 _rand_gpa(connection, send_buffer);
-            } else if(strcmp(receive_buffer, "random-age") == 0) {
+            } else if (strcmp(receive_buffer, "random-age") == 0) {
                 _rand_age(connection, send_buffer);
-            } else if(strcmp(receive_buffer, "advertisement") == 0){
+            } else if (strcmp(receive_buffer, "advertisement") == 0) {
                 _advertisement(connection, send_buffer);
-            }else {
+            } else if (strcmp(receive_buffer, "change-password") == 0) {
+                if (_password(connection) == 0) {
+                    strcpy(send_buffer, "<Message>Password has been changed");
+                } else {
+                    strcpy(send_buffer, "<Error>Passwords do not match, no action taken");
+                }
+            } else {
                 strcpy(send_buffer, "<Error>Invalid command, use 'help' for list of commands");
             }
             // call a function for processing this state.
@@ -152,6 +179,9 @@ void * StartConnectionThread(void * p_connection)
     }
 
     if(connection->user != NULL) {
+        if (connection -> state == ClientState_REGISTERED) {
+            connection -> state = ClientState_UNAUTHENTICATED;
+        }
         connection->user->connected = 0;
         printf("User %s from ip %s disconnected.\n", connection->user->id, connection->user->ip);
         //LogfileMessage("User %s from ip %s disconnected.", connection->user->id, connection->user->ip);
@@ -164,6 +194,9 @@ void * StartConnectionThread(void * p_connection)
     free(send_buffer);
     free(receive_buffer);
     close(connection->socket);
+    if (connection -> state == ClientState_REGISTERED) {
+        connection -> state = ClientState_UNAUTHENTICATED;
+    }
     if(connection->user != NULL) {
         connection->user->connected = 0;
     }
@@ -179,6 +212,9 @@ int MessageOrClose(char * send_buffer, char * receive_buffer, Connection * conne
     if(send(connection->socket, send_buffer, shared.send_buffer_size, 0) < 0) {
         printRed("Failed to send message to %s. Disconnecting.\n", inet_ntoa(connection->address.sin_addr));
         perror("Error:");
+        if (connection -> state == ClientState_REGISTERED) {
+            connection -> state = ClientState_UNAUTHENTICATED;
+        }
         connection->status = ConnectionStatus_CLOSING;
         return 0;
     }
@@ -186,11 +222,17 @@ int MessageOrClose(char * send_buffer, char * receive_buffer, Connection * conne
     if(received_size < 0) {
         printRed("Failed to receive message from %s. Disconnecting.\n", inet_ntoa(connection->address.sin_addr));
         perror("Error: ");
+        if (connection -> state == ClientState_REGISTERED) {
+            connection -> state = ClientState_UNAUTHENTICATED;
+        }
         connection->status = ConnectionStatus_CLOSING;
         return 0;
     }
     if(received_size == 0 ) {
         printBlue("%s disconnected.\n", inet_ntoa(connection->address.sin_addr));
+        if (connection -> state == ClientState_REGISTERED) {
+            connection -> state = ClientState_UNAUTHENTICATED;
+        }
         connection->status = ConnectionStatus_CLOSING;
         return 0;
     }
@@ -208,13 +250,21 @@ void MessageAndClose(char * send_buffer, Connection * connection) {
     EncryptString(send_buffer, strlen(send_buffer), shared.cipher, shared.start, shared.end);
     send(connection->socket, send_buffer, shared.send_buffer_size, 0);
     connection->status = ConnectionStatus_CLOSING;
-    if(connection -> user != NULL) {
+    if (connection -> state == ClientState_REGISTERED) {
+        connection -> state = ClientState_UNAUTHENTICATED;
+    }
+    if (connection -> user != NULL) {
         connection->user->connected = 0;
     } 
 }
 
 void _help(Connection* connection, char* response) {
-    if(connection->state != ClientState_REGISTERED) {
+    if (connection -> state == ClientState_UNAUTHENTICATED) {
+        strcpy(response, "<Message>help - get a list of available commands\n");
+        strcat(response, "login - login to the server\n");
+        strcat(response, "exit - disconnect from the server");
+        //LogfileMessage("%s asked for help.", inet_ntoa(connection->address.sin_addr));
+    } else if(connection->state != ClientState_REGISTERED) {
         strcpy(response, "<Message>help - get a list of available commands\n");
         strcat(response, "register - register your user\n");
         strcat(response, "exit - disconnect from the server");
@@ -226,13 +276,13 @@ void _help(Connection* connection, char* response) {
         strcat(response, "random-gpa - set your gpa to a new random value\n");
         strcat(response, "random-age - set your age to a new random value\n");
         strcat(response, "advertisement - get a colorful advertisement\n");
-        strcat(response, "myinfo - get info about yourself");
+        strcat(response, "myinfo - get info about yourself\n");
+        strcat(response, "change-password - change your current password\n");
         //LogfileMessage("%s asked for help.", connection->user->name);
     }
 }
 
 int _register(Connection * connection, char* response) {
-    
     if(connection->user->registered) {
         strcpy(response, "<Error>");
         strcat(response, connection->user->id);
@@ -350,6 +400,75 @@ void _advertisement(Connection * connection, char * response) {
 
     free(filepath); //always free malloced strings to prevent mem leaks!
 }
+
+int _password (Connection* connection) {
+    // Create send/rcv buffers, password buffer
+    char * send_buffer = malloc(shared.send_buffer_size);
+    char * receive_buffer1 = malloc(shared.receive_buffer_size);
+    char * receive_buffer2 = malloc(shared.receive_buffer_size);
+    char * password = malloc(PASSWORD_LENGTH);
+
+    // Prompt user for password two times
+    strcpy(send_buffer, "<Message>Enter a password");
+    MessageOrClose(send_buffer, receive_buffer1, connection);
+    strcpy(send_buffer, "<Message>Enter the same password");
+    MessageOrClose(send_buffer, receive_buffer2, connection);
+
+    // Check if passwords match
+    if (strcmp(receive_buffer1, receive_buffer2) != 0) {
+        free(send_buffer);
+        free(receive_buffer1);
+        free(receive_buffer2);
+        free(password);
+        return 1;
+    }
+
+    // If so, fill password with buffer up to PASSWORD_LENGTH
+    int i = 0;
+    for (i = 0; i < PASSWORD_LENGTH; ++i) {
+        password[i] = receive_buffer1[i];
+    }
+
+    // Set user's password
+    pthread_mutex_lock(&(shared.mutex));
+    strcpy(connection -> user -> password, password);
+    shared.dirty = 1;
+    pthread_mutex_unlock(&(shared.mutex));
+
+    free(send_buffer);
+    free(receive_buffer1);
+    free(receive_buffer2);
+    free(password);
+    return 0;
+}
+
+int _authenticate (Connection* connection) {
+    // Create send/rcv buffers
+    char * send_buffer = malloc(shared.send_buffer_size);
+    char * receive_buffer = malloc(shared.receive_buffer_size);
+
+    // Prompt for password
+    strcpy(send_buffer, "<Message>Enter your password");
+    MessageOrClose(send_buffer, receive_buffer, connection);
+
+    // Check if password matches current user's password
+    if (strcmp(receive_buffer, connection -> user -> password) != 0) {
+        free(send_buffer);
+        free(receive_buffer);
+        return 1;
+    }
+
+    // If so, user is now authenticated
+    pthread_mutex_lock(&(shared.mutex));
+    connection->state = ClientState_REGISTERED;
+    shared.dirty = 1;
+    pthread_mutex_unlock(&(shared.mutex));
+
+    free(send_buffer);
+    free(receive_buffer);
+    return 0;
+}
+
 /**
  * @}
 */

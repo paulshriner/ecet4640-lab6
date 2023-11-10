@@ -1,6 +1,6 @@
-# ecet4640-lab5
+# ecet4640-lab6
 
-Instructions for this assignment are located [at this link](https://students.calu.edu/calupa/chen/ecet4640/lab/phase2cs.html)
+Instructions for this assignment are located [at this link](https://students.pennwest.edu/chen/ecet4640/lab/phase3security.html)
 
 ## Some todos
 - ~~log when client disconnects, log user if extant~~

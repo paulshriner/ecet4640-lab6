@@ -39,7 +39,8 @@ typedef struct {
 
 #define ClientState_ENTRY 1
 #define ClientState_ACCESSING 2
-#define ClientState_REGISTERED 3 
+#define ClientState_REGISTERED 3
+#define ClientState_UNAUTHENTICATED 4
 typedef short ClientState;
 
 #define ConnectionStatus_CLOSED 0
@@ -168,20 +169,21 @@ void _advertisement(Connection * connection, char * response);
 
 /**
  * @brief Sends password changing request to user
+ * @todo Possible check that length of password given is less than PASSWORD_LENGTH, refuse if so?
  * 
  * @param connection connection the user is on
- * @param password the string will be set to the users password if given password was valid, empty otherwise
- * @returns 1 if valid password was entered, 0 otherwise
+ * @returns 0 if valid password was entered, 1 if invalid
  */
-int _password(Connection* connection, char * password);
+int _password(Connection* connection);
 
 /**
- * @brief changes the users password to the new password given
+ * @brief Authenticates a login request
  * 
  * @param connection connection the user is on
- * @param response fills the response buffer with what to send to the client
- */
-void _changePassword(Connection* connection, char* response);
+ * @returns 0 if valid password was entered, 1 if invalid
+*/
+int _authenticate(Connection* connection);
+
 /**
  * @}
 */
