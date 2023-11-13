@@ -13,7 +13,7 @@
 #include "Log.h"
 #include "Data.h"
 #include "File.h"
-//#include "Logfile.h"
+#include "Logfile.h"
 #include "Cipher.h"
 
 ClientShared shared;
@@ -47,7 +47,6 @@ void * StartUpdateThread(void * parameter)
                 shared.dirty = 1;
             }
             pthread_mutex_unlock(&(shared.mutex));
-            //LogfileMessage("Updated registered users file.");
         }
         sleep(1);
 
@@ -76,14 +75,14 @@ void * StartConnectionThread(void * p_connection)
             printYellow("Unauthorized access attempt by %s with name '%s'.\n", inet_ntoa(connection->address.sin_addr), receive_buffer);
             strcpy(send_buffer, "<Error>No such user");
             MessageAndClose(send_buffer, connection);
-            //LogfileError("Unauthorized access attempt by unknown user %s from %s.", receive_buffer, inet_ntoa(connection->address.sin_addr));
+            LogfileError("Unauthorized access attempt by unknown user %s from %s.", receive_buffer, inet_ntoa(connection->address.sin_addr));
             // send a one-way message to the client
         } else {
             User * user = (User *) result.data;
             if(user->connected) {
                 printYellow("User %s attempted to double connect from IP %s.\n", user->id, inet_ntoa(connection->address.sin_addr));
                 strcpy(send_buffer, "<Error>You are already connected.");
-                //LogfileError("User %s attempted to double connect from IP %s.\n", user->id, inet_ntoa(connection->address.sin_addr));
+                LogfileError("User %s attempted to double connect from IP %s.\n", user->id, inet_ntoa(connection->address.sin_addr));
                 MessageAndClose(send_buffer, connection);
                 // send the other connected user an informative message?
             } else {
@@ -93,7 +92,7 @@ void * StartConnectionThread(void * p_connection)
                 if(connection->user->registered) {
                     connection->state = ClientState_UNAUTHENTICATED;
                     //TODO check password
-                    //LogfileMessage("User %s logged in from ip %s.", connection->user->name, inet_ntoa(connection->address.sin_addr));
+                    LogfileMessage("User %s is attempting a login from ip %s.", connection->user->name, inet_ntoa(connection->address.sin_addr));
                 } else {
                     connection->state = ClientState_ACCESSING;
                 }                
@@ -121,8 +120,10 @@ void * StartConnectionThread(void * p_connection)
             } else if (strcmp(receive_buffer, "register") == 0) {
                 if (_password(connection) == 0) {
                     _register(connection, send_buffer);
+                    LogfileMessage("User %s registered.", connection->user->id);
                 } else {
                     strcpy(send_buffer, "<Error>Invalid password entered, cannot register");
+                    LogfileError("User %s attempted to register with an invalid password.", connection->user->id);
                 }
             } else {
                 strcpy (send_buffer, "<Error>Invalid command, use 'help' for list of commands");
@@ -137,8 +138,13 @@ void * StartConnectionThread(void * p_connection)
             } else if (strcmp(receive_buffer, "login") == 0) {
                 if (_authenticate(connection) == 0) {
                     strcpy(send_buffer, "<Message>You have logged in!");
+                    connection->user->lastConnection = time(NULL);
+                    printBlue("Setting connection time_connected to: %d\n", connection->time_connected);
+                    shared.dirty = 1;
+                    LogfileMessage("User %s logged in.", connection->user->id);
                 } else {
                     strcpy(send_buffer, "<Message>Login failed!");
+                    LogfileError("Failed login attempt for user %s.", connection->user->id);
                 }
             } else {
                 strcpy (send_buffer, "<Error>Invalid command, use 'help' for list of commands");
@@ -181,10 +187,10 @@ void * StartConnectionThread(void * p_connection)
     if(connection->user != NULL) {
         connection->user->connected = 0;
         printf("User %s from ip %s disconnected.\n", connection->user->id, connection->user->ip);
-        //LogfileMessage("User %s from ip %s disconnected.", connection->user->id, connection->user->ip);
+        LogfileMessage("User %s from ip %s disconnected.", connection->user->id, connection->user->ip);
     } else {
         printf("Ip %s disconnected.\n", inet_ntoa(connection->address.sin_addr));
-        //LogfileMessage("Ip %s disconnected.\n", inet_ntoa(connection->address.sin_addr));
+        LogfileMessage("Ip %s disconnected.\n", inet_ntoa(connection->address.sin_addr));
     }
     
 
@@ -245,12 +251,12 @@ void _help(Connection* connection, char* response) {
         strcpy(response, "<Message>help - get a list of available commands\n");
         strcat(response, "login - login to the server\n");
         strcat(response, "exit - disconnect from the server");
-        //LogfileMessage("%s asked for help.", inet_ntoa(connection->address.sin_addr));
+        LogfileMessage("%s asked for help.", inet_ntoa(connection->address.sin_addr));
     } else if(connection->state != ClientState_REGISTERED) {
         strcpy(response, "<Message>help - get a list of available commands\n");
         strcat(response, "register - register your user\n");
         strcat(response, "exit - disconnect from the server");
-        //LogfileMessage("%s asked for help.", inet_ntoa(connection->address.sin_addr));
+        LogfileMessage("%s asked for help.", inet_ntoa(connection->address.sin_addr));
     } else if(connection->state == ClientState_REGISTERED) {
         strcpy(response, "<Message>help - get a list of available commands\n");
         strcat(response, "exit - disconnect from the server\n");
@@ -260,7 +266,7 @@ void _help(Connection* connection, char* response) {
         strcat(response, "advertisement - get a colorful advertisement\n");
         strcat(response, "myinfo - get info about yourself\n");
         strcat(response, "change-password - change your current password\n");
-        //LogfileMessage("%s asked for help.", connection->user->name);
+        LogfileMessage("%s asked for help.", connection->user->name);
     }
 }
 
@@ -271,7 +277,7 @@ int _register(Connection * connection, char* response) {
         strcat(response, " is already registered.");
 
         printRed("%s from ip %s has attempted to register a second time.\n", connection->user->id, inet_ntoa(connection->address.sin_addr));
-        //LogfileError("%s from ip %s has attempted to register a second time.\n", connection->user->id, inet_ntoa(connection->address.sin_addr));
+        LogfileError("%s from ip %s has attempted to register a second time.\n", connection->user->id, inet_ntoa(connection->address.sin_addr));
         return 0;
     }
 
@@ -289,7 +295,7 @@ int _register(Connection * connection, char* response) {
 
     connection->state = ClientState_REGISTERED;
 
-    //LogfileMessage("%s registered from ip %s.", connection->user->id, inet_ntoa(connection->address.sin_addr));
+    LogfileMessage("%s registered from ip %s.", connection->user->id, inet_ntoa(connection->address.sin_addr));
     printBlue("%s registered.\n", connection->user->id);
 
     shared.dirty = 1;
@@ -317,7 +323,7 @@ int _myinfo(Connection* connection, char* response) {
     snprintf(response, shared.send_buffer_size, "<User.Name>%s<User.Age>%d<User.GPA>%.2f<User.IP>%s", connection->user->name, connection->user->age, connection->user->gpa, inet_ntoa(connection->address.sin_addr));
 
     printf("%s viewed their information.\n", connection->user->id);
-    //LogfileMessage("%s viewed their information.", connection->user->name);
+    LogfileMessage("%s viewed their information.", connection->user->name);
 
     return 0;
 }
@@ -350,7 +356,7 @@ void _rand_gpa(Connection* connection, char* response) {
     sprintf(gpa_str, "%.2f", connection->user->gpa);
     strcat(response, "<User.GPA>");
     strcat(response, gpa_str);
-    //LogfileMessage("%s randomized their gpa.", connection->user->name);
+    LogfileMessage("%s randomized their gpa.", connection->user->name);
 }
 
 void _rand_age(Connection* connection, char * response) {
@@ -362,7 +368,7 @@ void _rand_age(Connection* connection, char * response) {
     sprintf(age_str, "%d", connection->user->age);
     strcat(response, "<User.Age>");
     strcat(response, age_str);
-    //LogfileMessage("%s randomized their age.", connection->user->name);
+    LogfileMessage("%s randomized their age.", connection->user->name);
 }
 
 void _advertisement(Connection * connection, char * response) {
@@ -377,7 +383,7 @@ void _advertisement(Connection * connection, char * response) {
 
     strcat(response, "<Message>");
 
-    //LogfileMessage("User %s viewed advertisement %s.", connection->user->name, filepath);
+    LogfileMessage("User %s viewed advertisement %s.", connection->user->name, filepath);
     CatFileToBuffer(filepath, response, shared.send_buffer_size);
 
     free(filepath); //always free malloced strings to prevent mem leaks!

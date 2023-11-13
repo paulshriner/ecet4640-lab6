@@ -18,6 +18,7 @@
 #include "map.h"
 #include "Logfile.h"
 #include "Log.h"
+#include "File.h"
 
 ServerProperties server;
 Connection * connections;
@@ -151,6 +152,12 @@ int StartServer(map * users_map) {
         perror("Bind Error:");
         return 0;
     }
+    server.socket_id = serverSocket;
+    int lockfile_success = CreateLockfile();
+    if(!lockfile_success) {
+        printRed("Failed to create Lockfile! Server cannot start.");
+        return 0;
+    }
     // Initialized a shared space that will be used across threads.
     ClientShared * shared = InitializeShared(users_map, server.send_buffer_size, server.receive_buffer_size, server.cipher, server.start, server.end);
     // The update thread is responsible for checking if there is 'dirty' data that should be saved to the registered user's file.
@@ -199,6 +206,10 @@ Connection * NextAvailableConnection()
         }
     }
     return NULL;
+}
+
+int CloseServer() {
+    return close(server.socket_id);
 }
 
 

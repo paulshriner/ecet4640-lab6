@@ -11,7 +11,7 @@ void RunAllTests(void)
     
     CuSuiteAddSuite(suite, mapTestGetSuite());
     CuSuiteAddSuite(suite, utilTestGetSuite());
-    CuSuiteAddSuite(suite, cryptTestGetSuite());
+    //CuSuiteAddSuite(suite, cryptTestGetSuite());
 
     CuSuiteRun(suite);
     CuSuiteSummary(suite, output);

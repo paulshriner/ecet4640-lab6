@@ -177,6 +177,11 @@ int Initialize() {
 void SignalHandle(int signo) {
     if(signo == SIGINT || signo == SIGTERM) {
         printYellow("Received signal. Shutting down server.\n");
+        int err = CloseServer();
+        if(err) {
+            printRed("Problem closing server\n");
+            perror("Error closing socket interface.\n");
+        }
         DeleteLockfile();
         exit(0);
     }
@@ -191,11 +196,6 @@ int RunCommand() {
     }
     signal(SIGTERM, SignalHandle);
     signal(SIGINT, SignalHandle);
-    int lockfile_success = CreateLockfile();
-    if(!lockfile_success) {
-        printRed("Failed to create Lockfile! Server cannot start.");
-        return 0;
-    }
     int init_success = Initialize();
     if(!init_success) {
         printRed("Could not start the server due to failed initialization.\n");

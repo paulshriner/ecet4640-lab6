@@ -148,7 +148,7 @@ void UpdateRegisteredFileFromUsersMap(FILE * reg_file, map * users_map) {
 
         User * user = (User *) result.data;
         if(user->registered) {
-            fprintf(reg_file, "%s\t%d\t%f\t%s\t%ld\t%s", user->id, user->age, user->gpa, user->ip, user->lastConnection, user -> password);
+            fprintf(reg_file, "%s\t%d\t%f\t%s\t%ld\t%s\n", user->id, user->age, user->gpa, user->ip, user->lastConnection, user -> password);
         }
     }
 }

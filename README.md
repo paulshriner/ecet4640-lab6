@@ -8,11 +8,11 @@ Instructions for this assignment are located [at this link](https://students.pen
 - ~~implement registered users files~~
 - ~~implement lockfile~~
 - ~~implement command line args~~
-    - 'headless' command again, to ./nohup itself
-    - stop command
-    - reset command
+    ~~- 'headless' command again, to ./nohup itself~~
+    ~~- stop command~~
+    ~~- reset command~~
 - ~~implement interrupt signals, sigterm signals, for graceful shutdown (write lockfile, ensure text is normal color)~~
-- logging to logfile?
+- ~~logging to logfile?~~
 
 - Note: the server IP is: 158.83.254.100   but it doesn't appear we can expose ports currently. Should talk to Prof. chen about this. 
 
@@ -49,18 +49,3 @@ Bonus Possibilities:
 
 
 # Some high-priority Todos
-
-- Line 83 ish of Connection.c:
-    - write a function to handle ClientState_Accessing
-- Line 86 of Connection.c
-    - write a function to handle ClientState_Registered
-
-- Line 31 of Connection.c
-    - finish writing the update thread (writes registered file if data is dirty)
-
-- Logger improvements
-    - seperate server-settings.txt parameters for console log level and logfile log leve
-    - printing logs to console in the appropriate color
-    - prepending text indicating the log type, eg [ERROR]
-    - prepending a date string
-    - actually using the logging functionality around the program

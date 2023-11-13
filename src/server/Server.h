@@ -24,6 +24,8 @@ typedef struct {
     size_t send_buffer_size;
     /** The size of each receive buffer. */
     size_t receive_buffer_size;
+    /** The socket ID for the bound interface */
+    int socket_id;
     /** The size of the backlog of unprocessed connections. */
     int backlog;
     /** The number of active connections. */
@@ -32,13 +34,10 @@ typedef struct {
     int max_connections;
     /** The time the server was started. */
     time_t time_started;
-
     /** The cipher to use when encrypting and decrypting messages*/
     char* cipher;
-
     /** first character in cipher substitutions range*/
     char start;
-
     /** last character in cipher substituion range*/
     char end;
 } ServerProperties;
@@ -64,6 +63,12 @@ int InitializeCipher();
  * @returns 1 if the server ran and shutdown gracefully, 0 if there was an error during setup.
 */
 int StartServer(map * users_map);
+
+/**
+ * Unbinds the socket interface and closes the server. 
+ * @returns 0 on success or a number on error
+*/
+int CloseServer();
 
 /**
  * Iterates through the Connections array until it finds one whose 'active' field is false and returns it.
