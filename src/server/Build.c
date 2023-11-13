@@ -5,6 +5,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include "Build.h"
+#include "Util.h"
 
 User * CreateUsersArray(char ** userIDs, char ** userNames, int recordsCount)
 {
@@ -26,6 +27,10 @@ map * CreateUsersMap(User * usersArray, int recordsCount)
     int i;
     for(i = 0; i < recordsCount; i++) {
         Map_Set(umap, usersArray[i].id, &usersArray[i]);
+        map_result mr = Map_Get(umap, usersArray[i].id);
+        if(!mr.found) {
+            printRed("Map failed on user: %s... your program may have issues.\n", usersArray[i].id);
+        }
     }
     return umap;
 }

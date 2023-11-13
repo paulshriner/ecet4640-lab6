@@ -14,7 +14,7 @@ void BasicTests(CuTest *tc)
 
     char* to_encrypt = " ~";
     char* decrypted = " ~";
-    char* expected = "`x";
+    //char* expected = "`x";
 
     EncryptString(to_encrypt, 2, cipher, start, end);
     // CuAssertIntEquals(tc, expected[0], to_encrypt[0]);
@@ -25,7 +25,7 @@ void BasicTests(CuTest *tc)
 
 }
 
-
+/** Not used; cipher is working. */
 CuSuite * cryptTestGetSuite()
 {
     CuSuite *suite = CuSuiteNew();

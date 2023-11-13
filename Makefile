@@ -118,7 +118,7 @@ $(CLIENT_OUTPUT_FILENAME): $(CLIENT_OBJ_FILES)
 
 # Build the test executable
 $(TESTOUTFILE): $(TEST_OBJ_FILES)
-	$(CC) $(TEST_OBJ_FILES) -o $@
+	$(CC) $(TEST_OBJ_FILES) -lpthread -o $@
 
 # clean, and clean files
 cleanf: clean
