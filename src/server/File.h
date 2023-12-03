@@ -33,7 +33,8 @@
  * @note send_buffer_size; the size of the send buffer
  * @note receive_buffer_size; the size of the receive buffer
  * @note backlog; the quantity of allowed backlogged unprocessed connections.
- * @todo Create file functions for this.
+ * @note log_file; the name of the logging file
+ * 
 */
 #define SERVER_SETTINGS_FILE "server-settings.txt"
 

@@ -15,7 +15,6 @@
  * 
  * Defined in server-settings.txt, a configuration file.
  * 
- * @todo Read properties from a configuration file? Wrap a sockaddr_in? Should it contain buffer size? Should it contain an array of active threads? 
 */
 typedef struct {
     /** The port the server will connect on. */
