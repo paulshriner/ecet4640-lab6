@@ -17,7 +17,6 @@
 #include "Util.h"
 #include "map.h"
 #include "Logfile.h"
-#include "Log.h"
 #include "File.h"
 
 ServerProperties server;

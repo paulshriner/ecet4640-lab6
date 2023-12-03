@@ -10,7 +10,6 @@
 #include <arpa/inet.h>
 #include <unistd.h>
 #include "Util.h"
-#include "Log.h"
 #include "Data.h"
 #include "File.h"
 #include "Logfile.h"
@@ -43,7 +42,7 @@ void * StartUpdateThread(void * parameter)
                 UpdateRegisteredFileFromUsersMap(reg_file, shared.users);
                 fclose(reg_file);
             } else {
-                LogfError("FAILED TO OPEN REGISTERED FILE - NO DATA WILL BE UPDATED");
+                LogfileError("FAILED TO OPEN REGISTERED FILE - NO DATA WILL BE UPDATED");
                 shared.dirty = 1;
             }
             pthread_mutex_unlock(&(shared.mutex));
@@ -91,7 +90,6 @@ void * StartConnectionThread(void * p_connection)
                 strcpy(connection->user->ip, inet_ntoa(connection->address.sin_addr));
                 if(connection->user->registered) {
                     connection->state = ClientState_UNAUTHENTICATED;
-                    //TODO check password
                     LogfileMessage("User %s is attempting a login from ip %s.", connection->user->name, inet_ntoa(connection->address.sin_addr));
                 } else {
                     connection->state = ClientState_ACCESSING;
@@ -314,7 +312,7 @@ int _myinfo(Connection* connection, char* response) {
         strcat(response, connection->user->id);
         strcat(response, " is not registered.");
 
-        LogfError("%s from ip %s has attempted to view their information as an unregistered user.\n", connection->user->id, inet_ntoa(connection->address.sin_addr));
+        LogfileError("%s from ip %s has attempted to view their information as an unregistered user.\n", connection->user->id, inet_ntoa(connection->address.sin_addr));
 
         return 1;
     }

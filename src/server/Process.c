@@ -13,7 +13,6 @@
 #include "File.h"
 #include "Util.h"
 #include "Server.h"
-#include "Log.h"
 #include "Logfile.h"
 #include "Connection.h"
 

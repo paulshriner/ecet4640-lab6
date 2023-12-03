@@ -16,6 +16,7 @@ void SignalHandle(int signo);
 
 /**
  * Initializes the Cipher.
+ * @returns 1 on success, 0 if it can't set up key
 */
 int InitializeCipher();
 

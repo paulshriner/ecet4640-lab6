@@ -12,7 +12,6 @@
 #include "File.h"
 #include "Data.h"
 #include "Util.h"
-#include "Log.h"
 
 short FileStatus(char * filename) {
     int err = access(filename, F_OK);
@@ -142,7 +141,7 @@ void UpdateRegisteredFileFromUsersMap(FILE * reg_file, map * users_map) {
     for(i = 0; i < RECORD_COUNT; i++) {
         map_result result = Map_Get(users_map, accepted_userIDs[i]);
         if(!result.found) {
-            LogfError("User %s was not found in users map.", accepted_userIDs[i]);
+            printRed("User %s was not found in users map.", accepted_userIDs[i]);
             continue;
         }
 
