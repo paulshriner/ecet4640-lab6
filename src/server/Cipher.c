@@ -1,3 +1,8 @@
+/**
+ * \addtogroup Cipher
+ * @{
+*/
+
 /*
     Class: ECET 4640-002
     Assignment: Lab Assignment 3
@@ -98,3 +103,8 @@ void DecryptString(char* string, int length, char* cipher, char start, char end)
         }
     }
 }
+
+
+/**
+ * @}
+*/
