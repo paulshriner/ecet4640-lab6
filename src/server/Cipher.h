@@ -1,5 +1,11 @@
 #ifndef Cipher_h
 #define Cipher_h
+/**
+ * \defgroup Cipher
+ * \brief This module handles encryption and decryption.
+ * @{
+*/
+
 /*
     Class: ECET 4640-002
     Assignment: Lab Assignment 3
@@ -70,4 +76,8 @@ void EncryptString(char *string, int length, char *cipher, char start, char end)
     @param end The last character the ciper uses
  */
 void DecryptString(char* string, int length, char* cipher, char start, char end);
+
+/**
+ * @}
+*/
 #endif
